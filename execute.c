@@ -1,30 +1,32 @@
 #include "shell.h"
 
 /**
- * execute_command - Executes a single command using fork and execve
- * @line: command to execute
- *
- * Return: void
+ * execute_command - Executes a command
+ * @args: Argument list
  */
-void execute_command(char *line)
+void execute_command(char **args)
 {
 	pid_t pid;
 	int status;
-	char *args[2];
 
 	pid = fork();
 	if (pid == 0)
 	{
-		args[0] = line;
-		args[1] = NULL;
-		if (execve(line, args, NULL) == -1)
-		{
+		if (execve(args[0], args, NULL) == -1)
 			perror("./shell");
-			exit(1);
-		}
+		exit(EXIT_FAILURE);
 	}
 	else if (pid > 0)
+	{
 		wait(&status);
-	else
-		perror("fork");
+	}
+}
+
+/**
+ * free_args - Frees argument array
+ * @args: Argument list
+ */
+void free_args(char **args)
+{
+	free(args);
 }

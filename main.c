@@ -8,14 +8,22 @@
 int main(void)
 {
 	char *line;
+	char **args;
 
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "#cisfun$ ", 9);
+			write(STDOUT_FILENO, "$ ", 2);
 
-		line = read_line();
-		execute_command(line);
+		line = read_input();
+		if (!line)
+			break;
+
+		args = split_line(line);
+		if (args && args[0])
+			execute_command(args);
+
+		free_args(args);
 		free(line);
 	}
 

@@ -1,11 +1,11 @@
 #include "shell.h"
 
 /**
- * read_line - Reads a line of input from the user
+ * read_input - Reads a line from stdin
  *
- * Return: pointer to the input string (must be freed by caller)
+ * Return: Pointer to input line or NULL
  */
-char *read_line(void)
+char *read_input(void)
 {
 	char *line = NULL;
 	size_t len = 0;
@@ -15,9 +15,38 @@ char *read_line(void)
 	if (read == -1)
 	{
 		free(line);
-		exit(0);
+		return (NULL);
 	}
 
-	line[read - 1] = '\0';
+	if (line[read - 1] == '\n')
+		line[read - 1] = '\0';
+
 	return (line);
+}
+
+/**
+ * split_line - Splits line into arguments
+ * @line: Input line
+ *
+ * Return: Array of strings
+ */
+char **split_line(char *line)
+{
+	char **args;
+	char *token;
+	int i = 0;
+
+	args = malloc(sizeof(char *) * 64);
+	if (!args)
+		return (NULL);
+
+	token = strtok(line, " \t");
+	while (token)
+	{
+		args[i++] = token;
+		token = strtok(NULL, " \t");
+	}
+	args[i] = NULL;
+
+	return (args);
 }
