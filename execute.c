@@ -17,7 +17,7 @@ void execute_command(char *line)
 	{
 		args[0] = line;
 		args[1] = NULL;
-		if (execve(line, args, environ) == -1)
+		if (execve(line, args, NULL) == -1)
 		{
 			perror("./shell");
 			exit(1);
