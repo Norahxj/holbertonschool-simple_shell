@@ -5,6 +5,8 @@
 *
 * Return: Always 0
 */
+int last_status = 0;
+
 int main(void)
 {
 char *line;

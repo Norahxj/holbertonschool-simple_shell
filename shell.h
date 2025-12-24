@@ -10,6 +10,7 @@
 #include <errno.h> 
 
 extern char **environ;
+extern int last_status;
 
 /* Function Prototypes */
 char *read_input(void);
