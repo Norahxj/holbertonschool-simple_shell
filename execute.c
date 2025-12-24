@@ -27,11 +27,11 @@ if (!full_path)
 write(STDERR_FILENO, "./hsh: 1: ", 10);
 write(STDERR_FILENO, args[0], strlen(args[0]));
 write(STDERR_FILENO, ": not found\n", 12);
-return;
+last_status = 127;
 }
 
 pid = fork();
-if (pid == 0)
+if (pid == 0) /* Child */
 {
 execve(full_path, args, environ);
 write(STDERR_FILENO, "./hsh: 1: ", 10);
@@ -39,9 +39,18 @@ write(STDERR_FILENO, args[0], strlen(args[0]));
 write(STDERR_FILENO, ": not found\n", 12);
 exit(127);
 }
-else if (pid > 0)
+else if (pid > 0) /* Parent */
 {
 wait(&status);
 free(full_path);
+if (WIFEXITED(status))
+last_status = WEXITSTATUS(status);
+else
+last_status = 1;
+}
+else
+{
+perror("fork");
+last_status = 1;
 }
 }
