@@ -1,156 +1,130 @@
-#include "shell.h"
 #include <sys/stat.h>
-#include <errno.h>
+#include "shell.h"
 
-extern char **environ;
-
-/**
-* our_getenv - Gets environment variable value
-* @name: Variable name
-*
-* Return: Value or NULL
-*/
-char *our_getenv(const char *name)
+/* compare first n bytes, like strncmp */
+static int _strncmp(const char *s1, const char *s2, int n)
 {
-int i = 0;
-size_t name_len;
+int i;
 
-if (name == NULL || environ == NULL)
-return (NULL);
-
-name_len = strlen(name);
-
-for (i = 0; environ[i] != NULL; i++)
+for (i = 0; i < n; i++)
 {
-if (strncmp(environ[i], name, name_len) == 0 && environ[i][name_len] == '=')
-{
-return (environ[i] + name_len + 1);
+if (s1[i] != s2[i] || s1[i] == '\0' || s2[i] == '\0')
+return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
+return (0);
 }
 
+/* get value of PATH from env */
+static char *get_path_env(char **env)
+{
+int i;
+
+if (!env)
 return (NULL);
+
+for (i = 0; env[i]; i++)
+{
+if (_strncmp(env[i], "PATH=", 5) == 0)
+return (env[i] + 5);
 }
-
-/**
-* get_path_directories - Gets PATH directories safely
-*
-* Return: Array of directories (must be freed) or NULL
-*/
-char **get_path_directories(void)
-{
-char *path_value;
-char *path_copy;
-char **directories;
-int i = 0, count = 0;
-char *token;
-
-path_value = our_getenv("PATH");
-if (path_value == NULL || strlen(path_value) == 0)
-return (NULL);
-
-path_copy = strdup(path_value);
-if (path_copy == NULL)
-return (NULL);
-
-for (i = 0; path_copy[i]; i++)
-if (path_copy[i] == ':')
-count++;
-count++;
-
-directories = malloc(sizeof(char *) * (count + 1));
-if (!directories)
-{
-free(path_copy);
 return (NULL);
 }
 
-i = 0;
-token = strtok(path_copy, ":");
-while (token)
+/* build "dir/command" */
+static char *join_path(const char *dir, const char *command)
 {
-directories[i] = strdup(token);
-if (!directories[i])
-{
-int j;
-for (j = 0; j < i; j++)
-free(directories[j]);
-free(directories);
-free(path_copy);
+int len_dir, len_cmd;
+char *p;
+int i, j;
+
+if (!dir || !command)
 return (NULL);
-}
-i++;
-token = strtok(NULL, ":");
-}
-directories[i] = NULL;
 
-free(path_copy);
-return (directories);
+len_dir = _strlen(dir);
+len_cmd = _strlen(command);
+
+p = malloc(len_dir + 1 + len_cmd + 1);
+if (!p)
+return (NULL);
+
+for (i = 0; i < len_dir; i++)
+p[i] = dir[i];
+
+p[i++] = '/';
+
+for (j = 0; j < len_cmd; j++)
+p[i + j] = command[j];
+
+p[i + j] = '\0';
+return (p);
 }
 
-/**
-* free_path_directories - Frees path directories array
-* @directories: Array to free
-*/
-void free_path_directories(char **directories)
+char *find_path(char *command, char **env)
 {
-int i = 0;
-
-if (!directories)
-return;
-
-while (directories[i])
-{
-free(directories[i]);
-i++;
-}
-free(directories);
-}
-
-/**
-* find_command_in_path - Finds command in PATH
-* @command: Command to find
-*
-* Return: Full path or NULL
-*/
-char *find_command_in_path(char *command)
-{
-char **dirs;
-char *full;
+char *path_env;
+char *path_dup;
+char *dir_start;
 int i;
 struct stat st;
 
-if (!command)
+if (!command || command[0] == '\0')
 return (NULL);
 
-if (command[0] == '/' || command[0] == '.')
+/* command contains '/' -> check directly */
+if (_strchr(command, '/'))
 {
-if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
+if (stat(command, &st) == 0)
 return (_strdup(command));
 return (NULL);
 }
 
-dirs = get_path_directories();
-if (!dirs)
+path_env = get_path_env(env);
+if (!path_env)
 return (NULL);
 
-for (i = 0; dirs[i]; i++)
+path_dup = _strdup(path_env);
+if (!path_dup)
+return (NULL);
+
+dir_start = path_dup;
+i = 0;
+
+while (1)
 {
-full = malloc(strlen(dirs[i]) + strlen(command) + 2);
-if (!full)
+/* end of one PATH segment or end of string */
+if (path_dup[i] == ':' || path_dup[i] == '\0')
+{
+char saved = path_dup[i];
+char *fullpath;
+
+path_dup[i] = '\0';
+
+if (*dir_start != '\0')
+{
+fullpath = join_path(dir_start, command);
+if (fullpath)
+{
+if (stat(fullpath, &st) == 0)
+{
+free(path_dup);
+return (fullpath);
+}
+free(fullpath);
+}
+}
+
+/* restore and move to next segment */
+path_dup[i] = saved;
+
+if (saved == '\0')
 break;
 
-strcpy(full, dirs[i]);
-strcat(full, "/");
-strcat(full, command);
-
-if (stat(full, &st) == 0 && (st.st_mode & S_IXUSR))
-{
-free_path_directories(dirs);
-return (full);
+dir_start = path_dup + i + 1;
 }
-free(full);
+i++;
 }
 
-free_path_directories(dirs);
+free(path_dup);
 return (NULL);
 }
+

@@ -1,14 +1,17 @@
 #include "shell.h"
 
-int is_builtin(char **args)
+void handle_exit(void)
 {
-if (!args || !args[0])
-return (0);
-
-if (strcmp(args[0], "exit") == 0)
-{
-exit(0);
+exit(last_status);
 }
 
-return (0);
+void handle_env(char **env)
+{
+int i;
+
+for (i = 0; env && env[i]; i++)
+{
+write(STDOUT_FILENO, env[i], _strlen(env[i]));
+write(STDOUT_FILENO, "\n", 1);
+}
 }

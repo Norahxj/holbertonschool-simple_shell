@@ -1,55 +1,49 @@
 #include "shell.h"
-/**
-* free_args - Frees argument array
-* @args: Argument list
-*/
-void free_args(char **args)
+
+int execute_command(char *line, char *prog, char **env, int count)
 {
-if (args)
-free(args);
-}
-/**
-* execute_command - Executes a command
-* @args: Argument list
-*/
-void execute_command(char **args)
-{
+char **argv;
+char *path;
 pid_t pid;
 int status;
-char *full_path;
 
-if (!args || !args[0])
-return;
-
-full_path = find_command_in_path(args[0]);
-if (!full_path)
+argv = split_line(line);
+if (!argv || !argv[0])
 {
-write(STDERR_FILENO, "./hsh: 1: ", 10);
-write(STDERR_FILENO, args[0], strlen(args[0]));
-write(STDERR_FILENO, ": not found\n", 12);
-last_status = 127;
-return;
+free_argv(argv);
+return (0);
+}
+
+path = find_path(argv[0], env);
+if (!path)
+{
+print_error(prog, argv[0], count);
+free_argv(argv);
+return (127);
 }
 
 pid = fork();
-if (pid == 0) /* Child */
+if (pid == -1)
 {
-execve(full_path, args, environ);
-perror("./hsh");
-exit(127);
+free(path);
+free_argv(argv);
+return (1);
 }
-else if (pid > 0) /* Parent */
+
+if (pid == 0)
 {
-wait(&status);
-free(full_path);
+execve(path, argv, env);
+print_error(prog, argv[0], count);
+_exit(127);
+}
+
+waitpid(pid, &status, 0);
+free(path);
+free_argv(argv);
+
 if (WIFEXITED(status))
-last_status = WEXITSTATUS(status);
-else
-last_status = 1;
+return (WEXITSTATUS(status));
+
+return (1);
 }
-else
-{
-perror("fork");
-last_status = 1;
-}
-}
+
