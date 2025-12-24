@@ -28,15 +28,14 @@ write(STDERR_FILENO, "./hsh: 1: ", 10);
 write(STDERR_FILENO, args[0], strlen(args[0]));
 write(STDERR_FILENO, ": not found\n", 12);
 last_status = 127;
+return;
 }
 
 pid = fork();
 if (pid == 0) /* Child */
 {
 execve(full_path, args, environ);
-write(STDERR_FILENO, "./hsh: 1: ", 10);
-write(STDERR_FILENO, args[0], strlen(args[0]));
-write(STDERR_FILENO, ": not found\n", 12);
+perror("./hsh");
 exit(127);
 }
 else if (pid > 0) /* Parent */
