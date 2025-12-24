@@ -1,31 +1,41 @@
 #include "shell.h"
 
 /**
- * main - Simple UNIX command line interpreter
- *
- * Return: Always 0
- */
+* main - Simple UNIX command line interpreter
+*
+* Return: Always 0
+*/
 int main(void)
 {
-	char *line;
-	char **args;
+char *line;
+char **args;
+int interactive = isatty(STDIN_FILENO);
 
-	while (1)
-	{
-		if (isatty(STDIN_FILENO))
-			write(STDOUT_FILENO, "$ ", 2);
+while (1)
+{
+if (interactive)
+write(STDOUT_FILENO, ":) ", 3);
 
-		line = read_input();
-		if (!line)
-			break;
+line = read_input();
+if (!line)
+{
+if (interactive)
+write(STDOUT_FILENO, "\n", 1);
+break;
+}
 
-		args = split_line(line);
-		if (args && args[0])
-			execute_command(args);
+args = split_line(line);
+if (args && args[0])
+{
+if (!is_builtin(args[0]))
+{
+execute_command(args);
+}
+}
 
-		free_args(args);
-		free(line);
-	}
+free_args(args);
+free(line);
+}
 
-	return (0);
+return (0);
 }
