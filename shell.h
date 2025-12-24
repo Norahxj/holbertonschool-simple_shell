@@ -16,7 +16,7 @@ char **split_line(char *line);
 void execute_command(char **args);
 void free_args(char **args);
 int is_builtin(char *command);
-void execute_exit(void);
+/*void execute_exit(void); */
 
 /* New functions for PATH handling */
 char *_get_env_custom(const char *name);
