@@ -27,7 +27,4 @@ char *find_command_in_path(char *command);
 char *_strdup(const char *str);
 int file_exists(char *path);
 
-/* Debug functions */
-void debug_print(const char *msg, const char *path);
-
 #endif

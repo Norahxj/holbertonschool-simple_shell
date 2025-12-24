@@ -32,16 +32,6 @@ return (NULL);
 }
 
 /**
-* debug_print - Prints debug information
-* @msg: Debug message
-* @path: Path to check
-*/
-void debug_print(const char *msg, const char *path)
-{
-fprintf(stderr, "DEBUG: %s: %s\n", msg, path ? path : "(null)");
-}
-
-/**
 * get_path_directories - Gets PATH directories safely
 *
 * Return: Array of directories (must be freed) or NULL
@@ -124,67 +114,43 @@ free(directories);
 */
 char *find_command_in_path(char *command)
 {
-char **directories;
-char *full_path = NULL;
+char **dirs;
+char *full;
+int i;
 struct stat st;
-int i = 0;
 
-if (!command || strlen(command) == 0)
+if (!command)
 return (NULL);
 
-debug_print("Looking for command", command);
-
-if (command[0] == '/' || 
-(command[0] == '.' && command[1] == '/') ||
-(command[0] == '.' && command[1] == '.' && command[2] == '/'))
+if (command[0] == '/' || command[0] == '.')
 {
-debug_print("It's a relative/absolute path", command);
-
-if (stat(command, &st) == 0 && S_ISREG(st.st_mode))
-{
-debug_print("File exists and is regular", command);
-if (st.st_mode & S_IXUSR)
-{
-debug_print("File is executable", command);
-return (strdup(command));
-}
-else
-{
-debug_print("File is NOT executable", command);
-}
-}
-else
-{
-debug_print("File does NOT exist or is not regular", command);
-}
-}
-
-directories = get_path_directories();
-if (!directories)
-return (NULL);
-
-while (directories[i])
-{
-full_path = malloc(strlen(directories[i]) + strlen(command) + 2);
-if (!full_path)
-{
-free_path_directories(directories);
+if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
+return (_strdup(command));
 return (NULL);
 }
 
-sprintf(full_path, "%s/%s", directories[i], command);
+dirs = get_path_directories();
+if (!dirs)
+return (NULL);
 
-if (stat(full_path, &st) == 0 && S_ISREG(st.st_mode) && (st.st_mode & S_IXUSR))
+for (i = 0; dirs[i]; i++)
 {
-free_path_directories(directories);
-return (full_path);
+full = malloc(strlen(dirs[i]) + strlen(command) + 2);
+if (!full)
+break;
+
+strcpy(full, dirs[i]);
+strcat(full, "/");
+strcat(full, command);
+
+if (stat(full, &st) == 0 && (st.st_mode & S_IXUSR))
+{
+free_path_directories(dirs);
+return (full);
+}
+free(full);
 }
 
-free(full_path);
-full_path = NULL;
-i++;
-}
-
-free_path_directories(directories);
+free_path_directories(dirs);
 return (NULL);
 }
