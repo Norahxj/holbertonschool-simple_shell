@@ -27,8 +27,10 @@ break;
 args = split_line(line);
 if (args && args[0])
 {
-if (!is_builtin(args[0]))
+if (!is_builtin(args))
+{
 execute_command(args);
+}
 }
 
 free_args(args);

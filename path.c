@@ -1,13 +1,16 @@
 #include "shell.h"
 #include <sys/stat.h>
+#include <errno.h>
+
+extern char **environ;
 
 /**
-* _get_env - Custom implementation to get environment variable
-* @name: Name of environment variable
+* our_getenv - Gets environment variable value
+* @name: Variable name
 *
-* Return: Value of variable or NULL if not found
+* Return: Value or NULL
 */
-char *_get_env(const char *name)
+char *our_getenv(const char *name)
 {
 int i = 0;
 size_t name_len;
@@ -17,16 +20,25 @@ return (NULL);
 
 name_len = strlen(name);
 
-while (environ[i] != NULL)
+for (i = 0; environ[i] != NULL; i++)
 {
 if (strncmp(environ[i], name, name_len) == 0 && environ[i][name_len] == '=')
 {
 return (environ[i] + name_len + 1);
 }
-i++;
 }
 
 return (NULL);
+}
+
+/**
+* debug_print - Prints debug information
+* @msg: Debug message
+* @path: Path to check
+*/
+void debug_print(const char *msg, const char *path)
+{
+fprintf(stderr, "DEBUG: %s: %s\n", msg, path ? path : "(null)");
 }
 
 /**
@@ -42,7 +54,7 @@ char **directories;
 int i = 0, count = 0;
 char *token;
 
-path_value = _get_env("PATH");
+path_value = our_getenv("PATH");
 if (path_value == NULL || strlen(path_value) == 0)
 return (NULL);
 
@@ -69,8 +81,9 @@ while (token)
 directories[i] = strdup(token);
 if (!directories[i])
 {
-while (i > 0)
-free(directories[--i]);
+int j;
+for (j = 0; j < i; j++)
+free(directories[j]);
 free(directories);
 free(path_copy);
 return (NULL);
@@ -119,9 +132,32 @@ int i = 0;
 if (!command || strlen(command) == 0)
 return (NULL);
 
-/* إذا كان الأمر مساراً كاملاً أو نسبياً */
-if (command[0] == '/' || (command[0] == '.' && command[1] == '/'))
+debug_print("Looking for command", command);
+
+if (command[0] == '/' || 
+(command[0] == '.' && command[1] == '/') ||
+(command[0] == '.' && command[1] == '.' && command[2] == '/'))
+{
+debug_print("It's a relative/absolute path", command);
+
+if (stat(command, &st) == 0 && S_ISREG(st.st_mode))
+{
+debug_print("File exists and is regular", command);
+if (st.st_mode & S_IXUSR)
+{
+debug_print("File is executable", command);
 return (strdup(command));
+}
+else
+{
+debug_print("File is NOT executable", command);
+}
+}
+else
+{
+debug_print("File does NOT exist or is not regular", command);
+}
+}
 
 directories = get_path_directories();
 if (!directories)
@@ -138,7 +174,7 @@ return (NULL);
 
 sprintf(full_path, "%s/%s", directories[i], command);
 
-if (stat(full_path, &st) == 0 && (st.st_mode & S_IXUSR))
+if (stat(full_path, &st) == 0 && S_ISREG(st.st_mode) && (st.st_mode & S_IXUSR))
 {
 free_path_directories(directories);
 return (full_path);

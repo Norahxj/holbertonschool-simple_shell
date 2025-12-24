@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <errno.h> 
 
 extern char **environ;
 
@@ -15,15 +16,18 @@ char *read_input(void);
 char **split_line(char *line);
 void execute_command(char **args);
 void free_args(char **args);
-int is_builtin(char *command);
-/*void execute_exit(void); */
+int is_builtin(char **args);
+void execute_exit(void);
 
 /* New functions for PATH handling */
-char *_get_env_custom(const char *name);
+char *our_getenv(const char *name);
 char **get_path_directories(void);
 void free_path_directories(char **directories);
 char *find_command_in_path(char *command);
 char *_strdup(const char *str);
 int file_exists(char *path);
+
+/* Debug functions */
+void debug_print(const char *msg, const char *path);
 
 #endif
