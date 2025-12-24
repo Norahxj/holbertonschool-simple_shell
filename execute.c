@@ -37,7 +37,7 @@ execve(full_path, args, environ);
 write(STDERR_FILENO, "./hsh: 1: ", 10);
 write(STDERR_FILENO, args[0], strlen(args[0]));
 write(STDERR_FILENO, ": not found\n", 12);
-exit(1);
+exit(127);
 }
 else if (pid > 0)
 {
