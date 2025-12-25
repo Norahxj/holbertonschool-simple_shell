@@ -1,49 +1,75 @@
 #include "shell.h"
 
-int execute_command(char *line, char *prog, char **env, int count)
+/**
+ * find_path - Finds command in PATH
+ * @command: Command name
+ *
+ * Return: Full path or NULL
+ */
+char *find_path(char *command)
 {
-char **argv;
-char *path;
-pid_t pid;
-int status;
+	char *path, *dir, *full;
+	struct stat st;
 
-argv = split_line(line);
-if (!argv || !argv[0])
-{
-free_argv(argv);
-return (0);
+	if (strchr(command, '/'))
+	{
+		if (stat(command, &st) == 0)
+			return (strdup(command));
+		return (NULL);
+	}
+
+	path = getenv("PATH");
+	if (!path || path[0] == '\0')
+	{
+		path = "/bin:/usr/bin";
+	}
+
+	path = strdup(path);
+	dir = strtok(path, ":");
+	while (dir)
+	{
+		full = malloc(strlen(dir) + strlen(command) + 2);
+		if (!full)
+			break;
+		sprintf(full, "%s/%s", dir, command);
+		if (stat(full, &st) == 0)
+		{
+			free(path);
+			return (full);
+		}
+		free(full);
+		dir = strtok(NULL, ":");
+	}
+	free(path);
+	return (NULL);
 }
 
-path = find_path(argv[0], env);
-if (!path)
+/**
+ * execute_command - Executes command if found
+ * @args: Argument list
+ */
+void execute_command(char **args)
 {
-print_error(prog, argv[0], count);
-free_argv(argv);
-return (127);
+	pid_t pid;
+	int status;
+	char *cmd_path;
+
+	cmd_path = find_path(args[0]);
+	if (!cmd_path)
+	{
+		write(STDERR_FILENO, "./shell: command not found\n", 28);
+		return;
+	}
+
+	pid = fork();
+	if (pid == 0)
+	{
+		execve(cmd_path, args, NULL);
+		perror("./shell");
+		exit(EXIT_FAILURE);
+	}
+	else if (pid > 0)
+		wait(&status);
+
+	free(cmd_path);
 }
-
-pid = fork();
-if (pid == -1)
-{
-free(path);
-free_argv(argv);
-return (1);
-}
-
-if (pid == 0)
-{
-execve(path, argv, env);
-print_error(prog, argv[0], count);
-_exit(127);
-}
-
-waitpid(pid, &status, 0);
-free(path);
-free_argv(argv);
-
-if (WIFEXITED(status))
-return (WEXITSTATUS(status));
-
-return (1);
-}
-
