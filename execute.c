@@ -7,29 +7,6 @@
 #include <stdio.h>
 
 /**
- * get_path_from_env - Retrieves PATH manually from environment
- * @env: environment variables array
- *
- * Return: PATH string or default "/bin:/usr/bin"
- */
-static char *get_path_from_env(char **env)
-{
-	int i = 0;
-
-	if (!env)
-		return ("/bin:/usr/bin");
-
-	while (env[i])
-	{
-		if (strncmp(env[i], "PATH=", 5) == 0)
-			return (env[i] + 5);
-		i++;
-	}
-
-	return ("/bin:/usr/bin");
-}
-
-/**
  * find_path - Finds command in PATH
  * @command: Command name
  *
