@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 
 /**
  * get_path_from_env - Retrieves PATH manually from environment
@@ -42,13 +41,9 @@ char *find_path(char *command)
 	struct stat st;
 
 	if (strchr(command, '/'))
-	{
-		if (stat(command, &st) == 0)
-			return (strdup(command));
-		return (NULL);
-	}
+		return (stat(command, &st) == 0 ? strdup(command) : NULL);
 
-	path = get_path_from_env(environ);
+	path = getenv("PATH");
 	if (!path || path[0] == '\0')
 		path = "/bin:/usr/bin";
 
@@ -99,7 +94,7 @@ void execute_command(char **args)
 	pid = fork();
 	if (pid == 0)
 	{
-		execve(cmd_path, args, environ);
+		execve(cmd_path, args, NULL);
 		perror("./shell");
 		exit(EXIT_FAILURE);
 	}
