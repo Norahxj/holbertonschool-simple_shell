@@ -20,17 +20,19 @@ char *find_path(char *command)
 
 	path = getenv("PATH");
 	if (!path || path[0] == '\0')
-	{
-		path = "/bin:/usr/bin";
-	}
+		return (NULL);
 
 	path = strdup(path);
+	if (!path)
+		return (NULL);
+
 	dir = strtok(path, ":");
 	while (dir)
 	{
 		full = malloc(strlen(dir) + strlen(command) + 2);
 		if (!full)
 			break;
+
 		sprintf(full, "%s/%s", dir, command);
 		if (stat(full, &st) == 0)
 		{
