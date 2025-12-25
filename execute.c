@@ -1,10 +1,14 @@
 #include "shell.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+
+/**
+ * get_path - Returns default PATH
+ *
+ * Return: String with PATH directories separated by ':'
+ */
+char *get_path(void)
+{
+	return ("/bin:/usr/bin");
+}
 
 /**
  * find_path - Finds command in PATH
@@ -14,21 +18,18 @@
  */
 char *find_path(char *command)
 {
-	char *path, *dir, *full, *path_copy;
+	char *path, *dir, *full;
 	struct stat st;
 
 	if (strchr(command, '/'))
 		return (stat(command, &st) == 0 ? strdup(command) : NULL);
 
-	path = getenv("PATH");
-	if (!path || path[0] == '\0')
-		path = "/bin:/usr/bin";
-
-	path_copy = strdup(path);
-	if (!path_copy)
+	path = get_path();
+	path = strdup(path);
+	if (!path)
 		return (NULL);
 
-	dir = strtok(path_copy, ":");
+	dir = strtok(path, ":");
 	while (dir)
 	{
 		full = malloc(strlen(dir) + strlen(command) + 2);
@@ -38,13 +39,13 @@ char *find_path(char *command)
 		sprintf(full, "%s/%s", dir, command);
 		if (stat(full, &st) == 0)
 		{
-			free(path_copy);
+			free(path);
 			return (full);
 		}
 		free(full);
 		dir = strtok(NULL, ":");
 	}
-	free(path_copy);
+	free(path);
 	return (NULL);
 }
 
@@ -57,9 +58,6 @@ void execute_command(char **args)
 	pid_t pid;
 	int status;
 	char *cmd_path;
-
-	if (!args || !args[0])
-		return;
 
 	cmd_path = find_path(args[0]);
 	if (!cmd_path)

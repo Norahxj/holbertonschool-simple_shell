@@ -57,8 +57,6 @@ char **split_line(char *line)
  */
 void free_args(char **args)
 {
-	if (!args)
-		return;
-
-	free(args);
+	if (args)
+		free(args);
 }

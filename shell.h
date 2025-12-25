@@ -14,5 +14,6 @@ void free_args(char **args);
 
 char *find_path(char *command);
 void execute_command(char **args);
+char *get_path(void);
 
 #endif
