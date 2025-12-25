@@ -50,3 +50,15 @@ char **split_line(char *line)
 
 	return (args);
 }
+
+/**
+ * free_args - Frees argument array
+ * @args: Array of arguments
+ */
+void free_args(char **args)
+{
+	if (!args)
+		return;
+
+	free(args);
+}
