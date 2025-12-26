@@ -7,7 +7,18 @@
  */
 char *get_path(void)
 {
-	return ("/bin:/usr/bin");
+	int i = 0;
+
+	if (!environ)
+		return (NULL);
+
+	while (environ[i])
+	{
+		if (strncmp(environ[i], "PATH=", 5) == 0)
+			return (environ[i] + 5);
+		i++;
+	}
+	return (NULL);
 }
 
 /**
@@ -18,18 +29,28 @@ char *get_path(void)
  */
 char *find_path(char *command)
 {
-	char *path, *dir, *full;
+	char *path, *dir, *full, *path_copy;
 	struct stat st;
 
-	if (strchr(command, '/'))
-		return (stat(command, &st) == 0 ? strdup(command) : NULL);
-
-	path = get_path();
-	path = strdup(path);
-	if (!path)
+	if (!command)
 		return (NULL);
 
-	dir = strtok(path, ":");
+	if (strchr(command, '/'))
+	{
+		if (stat(command, &st) == 0)
+			return (strdup(command));
+		return (NULL);
+	}
+
+	path = get_path();
+	if (!path || *path == '\0')
+		return (NULL);
+
+	path_copy = strdup(path);
+	if (!path_copy)
+		return (NULL);
+
+	dir = strtok(path_copy, ":");
 	while (dir)
 	{
 		full = malloc(strlen(dir) + strlen(command) + 2);
@@ -39,13 +60,13 @@ char *find_path(char *command)
 		sprintf(full, "%s/%s", dir, command);
 		if (stat(full, &st) == 0)
 		{
-			free(path);
+			free(path_copy);
 			return (full);
 		}
 		free(full);
 		dir = strtok(NULL, ":");
 	}
-	free(path);
+	free(path_copy);
 	return (NULL);
 }
 
@@ -59,21 +80,24 @@ void execute_command(char **args)
 	int status;
 	char *cmd_path;
 
+	if (!args || !args[0])
+		return;
+
 	cmd_path = find_path(args[0]);
 	if (!cmd_path)
 	{
-		write(STDERR_FILENO, "./shell: command not found\n", 28);
+		write(STDERR_FILENO, "hsh: command not found\n", 23);
 		return;
 	}
 
 	pid = fork();
 	if (pid == 0)
 	{
-		execve(cmd_path, args, NULL);
-		perror("./shell");
+		execve(cmd_path, args, environ);
+		perror("hsh");
 		exit(EXIT_FAILURE);
 	}
-	else if (pid > 0)
+	else
 		wait(&status);
 
 	free(cmd_path);

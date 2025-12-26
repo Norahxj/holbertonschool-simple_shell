@@ -8,12 +8,16 @@
 #include <string.h>
 #include <sys/stat.h>
 
+extern char **environ;
+
 char *read_input(void);
 char **split_line(char *line);
 void free_args(char **args);
 
+char *get_path(void);
 char *find_path(char *command);
 void execute_command(char **args);
-char *get_path(void);
+
+void print_env(void);
 
 #endif
