@@ -83,20 +83,13 @@ void execute_command(char **args)
 	if (!args || !args[0])
 		return;
 
-	if (strcmp(args[0], "exit") == 0)
-		exit(0);
-
-	if (strcmp(args[0], "env") == 0)
-	{
-		print_env();
-		return;
-	}
-
 	cmd_path = find_path(args[0]);
 	if (!cmd_path)
 	{
-		print_error(args[0]);
-		exit(127);
+		fprintf(stderr, "%s: %u: %s: not found\n",
+				prog_name, line_number, args[0]);
+		last_status = 127;
+		return;
 	}
 
 	pid = fork();
@@ -104,39 +97,14 @@ void execute_command(char **args)
 	{
 		execve(cmd_path, args, environ);
 		perror(prog_name);
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	else
+	{
 		wait(&status);
+		if (WIFEXITED(status))
+			last_status = WEXITSTATUS(status);
+	}
 
 	free(cmd_path);
-}
-
-/**
- * print_error - Prints error if found
- * @cmd: a command
- */
-void print_error(char *cmd)
-{
-	fprintf(stderr, "%s: %d: %s: not found\n",
-			prog_name, line_count, cmd);
-}
-
-/**
- * print_env - Prints env if found
- *
- */
-void print_env(void)
-{
-	int i = 0;
-
-	if (!environ)
-		return;
-
-	while (environ[i])
-	{
-		write(STDOUT_FILENO, environ[i], strlen(environ[i]));
-		write(STDOUT_FILENO, "\n", 1);
-		i++;
-	}
 }

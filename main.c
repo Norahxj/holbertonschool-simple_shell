@@ -5,8 +5,9 @@
  *
  * Return: Always 0
  */
-char *prog_name = NULL;
-int line_count = 0;
+char *prog_name;
+unsigned int line_number = 0;
+int last_status = 0;
 
 int main(int argc, char **argv)
 {
@@ -18,14 +19,14 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		line_count++;
-
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
 
 		line = read_input();
 		if (!line)
 			break;
+
+		line_number++;
 
 		args = split_line(line);
 		if (args && args[0])
@@ -34,5 +35,5 @@ int main(int argc, char **argv)
 		free_args(args);
 		free(line);
 	}
-	return (0);
+	return (last_status);
 }
