@@ -86,16 +86,17 @@ void execute_command(char **args)
 	cmd_path = find_path(args[0]);
 	if (!cmd_path)
 	{
-		write(STDERR_FILENO, "hsh: command not found\n", 23);
-		return;
+		fprintf(stderr, "%s: %u: %s: not found\n",
+				prog_name, line_number, args[0]);
+		exit(127);
 	}
 
 	pid = fork();
 	if (pid == 0)
 	{
 		execve(cmd_path, args, environ);
-		perror("hsh");
-		exit(EXIT_FAILURE);
+		perror(prog_name);
+		exit(1);
 	}
 	else
 		wait(&status);

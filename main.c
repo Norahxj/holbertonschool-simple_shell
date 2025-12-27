@@ -5,13 +5,21 @@
  *
  * Return: Always 0
  */
-int main(void)
+char *prog_name;
+unsigned int line_number = 0;
+
+int main(int argc, char **argv)
 {
 	char *line;
 	char **args;
 
+	(void)argc;
+	prog_name = argv[0];
+
 	while (1)
 	{
+		line_number++;
+
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
 

@@ -10,6 +10,9 @@
 
 extern char **environ;
 
+extern char *prog_name;
+extern unsigned int line_number;
+
 char *read_input(void);
 char **split_line(char *line);
 void free_args(char **args);
