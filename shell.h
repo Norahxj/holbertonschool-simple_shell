@@ -9,9 +9,8 @@
 #include <sys/stat.h>
 
 extern char **environ;
-
 extern char *prog_name;
-extern unsigned int line_number;
+extern int line_count;
 
 char *read_input(void);
 char **split_line(char *line);
@@ -22,5 +21,7 @@ char *find_path(char *command);
 void execute_command(char **args);
 
 void print_env(void);
+
+void print_error(char *cmd);
 
 #endif

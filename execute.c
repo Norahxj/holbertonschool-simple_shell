@@ -83,11 +83,19 @@ void execute_command(char **args)
 	if (!args || !args[0])
 		return;
 
+	if (strcmp(args[0], "exit") == 0)
+		exit(0);
+
+	if (strcmp(args[0], "env") == 0)
+	{
+		print_env();
+		return;
+	}
+
 	cmd_path = find_path(args[0]);
 	if (!cmd_path)
 	{
-		fprintf(stderr, "%s: %u: %s: not found\n",
-				prog_name, line_number, args[0]);
+		print_error(args[0]);
 		exit(127);
 	}
 
@@ -96,10 +104,39 @@ void execute_command(char **args)
 	{
 		execve(cmd_path, args, environ);
 		perror(prog_name);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	else
 		wait(&status);
 
 	free(cmd_path);
+}
+
+/**
+ * print_error - Prints error if found
+ * @cmd: a command
+ */
+void print_error(char *cmd)
+{
+	fprintf(stderr, "%s: %d: %s: not found\n",
+			prog_name, line_count, cmd);
+}
+
+/**
+ * print_env - Prints env if found
+ *
+ */
+void print_env(void)
+{
+	int i = 0;
+
+	if (!environ)
+		return;
+
+	while (environ[i])
+	{
+		write(STDOUT_FILENO, environ[i], strlen(environ[i]));
+		write(STDOUT_FILENO, "\n", 1);
+		i++;
+	}
 }

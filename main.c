@@ -5,8 +5,8 @@
  *
  * Return: Always 0
  */
-char *prog_name;
-unsigned int line_number = 0;
+char *prog_name = NULL;
+int line_count = 0;
 
 int main(int argc, char **argv)
 {
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		line_number++;
+		line_count++;
 
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
