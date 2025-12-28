@@ -1,112 +1,201 @@
-# Simple Shell Project (hsh)
+Simple Shell Project
+📖 Overview
+A minimal UNIX command line interpreter written in C that replicates basic sh functionality. This project demonstrates core operating system concepts including process creation, command execution, and environment management.
 
-## Description
-This project is a simple UNIX command line interpreter implemented in C as part of the Holberton School curriculum.
-The shell behaves similarly to `/bin/sh`, supporting both interactive and non-interactive modes.
+✨ Features
+Interactive & Non-Interactive Modes: Works with user input and piped commands
 
-It reads user input, parses commands, searches executables using the `PATH` environment variable, creates child processes, and executes commands using system calls.
+PATH Resolution: Searches for executables in PATH directories
 
----
+Built-in Commands: Supports exit command
 
-## Learning Objectives
+Error Handling: Displays errors matching /bin/sh format
 
-### General
-- Who designed and implemented the original UNIX operating system
-- Who wrote the first version of the UNIX shell
-- Who invented the B programming language (predecessor of C)
-- Who is Ken Thompson
-- How a shell works
-- What is a PID and a PPID
-- How to manipulate the environment of the current process
-- Difference between a function and a system call
-- How to create processes
-- The three prototypes of `main`
-- How the shell uses `PATH` to find programs
-- How to execute another program using `execve`
-- How to suspend execution until a child process terminates
-- What EOF (End Of File) means
+Memory Management: No memory leaks (valgrind clean)
 
----
-
-## Requirements
-
-### General
-- Allowed editors: `vi`, `vim`, `emacs`
-- Compiled on Ubuntu 20.04 LTS
-- Compilation flags:
-  ```sh
-  gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
-# Simple Shell Project (hsh)
-
-## Description
-This project is a simple UNIX command line interpreter implemented in C as part of the Holberton School curriculum.
-The shell behaves similarly to `/bin/sh`, supporting both interactive and non-interactive modes.
-
-It reads user input, parses commands, searches executables using the `PATH` environment variable, creates child processes, and executes commands using system calls.
-
----
-	•	All files end with a new line
-	•	Betty coding style enforced
-	•	No memory leaks
-	•	Maximum 5 functions per file
-	•	Header files must be include guarded
-	•	System calls used only when necessary
-
-⸻
-
-Authorized Functions and System Calls
-	•	All functions from <string.h>
-	•	access, chdir, close, execve, exit, _exit
-	•	fork, free, getline, getcwd, getpid
-	•	isatty, kill, malloc, open, perror
-	•	printf, fprintf, sprintf, putchar
-	•	read, stat, lstat, fstat
-	•	strtok, wait, waitpid, write
-
-⸻
-
-Compilation
+🛠️ Compilation
+bash
 gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
-⸻
-Usage
-
+🚀 Usage
 Interactive Mode
+bash
 $ ./hsh
-($) /bin/ls
-hsh main.c shell.h
-($) exit
-
+:) ls
+file1.txt file2.txt
+:) exit
+$
 Non-Interactive Mode
-$ echo "/bin/ls" | ./hsh
-hsh main.c shell.h
-⸻
+bash
+$ echo "ls" | ./hsh
+file1.txt file2.txt
+🔄 Flowchart - How the Shell Works
+┌───────────────┐
+            │   Start hsh   │
+            └───────┬───────┘
+                    │
+            ┌───────▼───────┐
+            │ Display $     │
+            │ (Interactive) │
+            └───────┬───────┘
+                    │
+            ┌───────▼───────┐
+            │ Read Input    │
+            │ (_getline)    │
+            └───────┬───────┘
+                    │
+        ┌───────────▼───────────┐
+        │ EOF (Ctrl+D) ?         │
+        └───────┬───────────────┘
+                │Yes
+                ▼
+        ┌───────────────────┐
+        │ Free memory &     │
+        │ Exit shell        │
+        └───────────────────┘
+                ▲
+                │No
+        ┌───────┴───────────┐
+        │ Parse input       │
+        │ into arguments    │
+        └───────┬───────────┘
+                │
+        ┌───────▼───────────┐
+        │ Built-in command? │
+        └───────┬───────────┘
+            Yes │       No
+                │
+        ┌───────▼───────┐   ┌───────────────────┐
+        │ Execute       │   │ Find command in    │
+        │ built-in      │   │ PATH or absolute   │
+        │ (exit/env)    │   │ path               │
+        └───────┬───────┘   └─────────┬─────────┘
+                │                     │
+                │             ┌───────▼───────────┐
+                │             │ Command found ?   │
+                │             └───────┬───────────┘
+                │                 Yes │       No
+                │                     │
+        ┌───────▼───────┐     ┌───────▼───────┐
+        │ Update exit   │     │ Print error   │
+        │ status        │     │ exit = 127    │
+        └───────┬───────┘     └───────┬───────┘
+                │                     │
+                └───────────┬─────────┘
+                            │
+                    ┌───────▼───────┐
+                    │ Fork process  │
+                    └───────┬───────┘
+                            │
+                    ┌───────▼───────┐
+                    │ execve()      │
+                    └───────┬───────┘
+                            │
+                    ┌───────▼───────┐
+                    │ waitpid()     │
+                    │ get exit code │
+                    └───────┬───────┘
+                            │
+                    ┌───────▼───────┐
+                    │ Free memory   │
+                    └───────┬───────┘
+                            │
+                    ┌───────▼───────┐
+                    │ Loop again    │
+                    └───────────────┘
+📁 File Structure
+text
+simple_shell/
+├── AUTHORS                 # Contributors list
+├── README.md              # This file
+├── man_1_simple_shell     # Manual page
+├── shell.h                # Header file with prototypes
+├── main.c                 # Entry point and main loop
+├── input.c                # Input reading and parsing
+├── path.c                 # PATH handling functions
+├── execute.c              # Command execution logic
+├── builtins.c             # Built-in commands (exit)
+└── helpers.c              # Utility functions
+🧠 Core Concepts Implemented
+Process Management
+Uses fork() to create child processes
+
+execve() replaces process image with command
+
+wait() suspends parent until child terminates
+
+PATH Resolution
+Checks if command contains / (absolute/relative path)
+
+Searches directories in PATH variable
+
+Uses access() or stat() to check file existence and permissions
+
+Returns full path or NULL if not found
+
 Error Handling
+Matches /bin/sh error format: ./hsh: 1: command: not found
 
-The shell prints errors in the same format as /bin/sh, except that the program name matches argv[0].
+Returns exit code 127 for command not found
 
-Example:
-./hsh: 1: qwerty: not found
-⸻
-Project Structure
-.
-├── shell.h
-├── main.c
-├── input.c
-├── path.c
-├── execute.c
-└── README.md
-⸻
-Flowchart
+Uses write() for error output to avoid forbidden functions
 
-The shell logic follows a structured flow:
-	•	Prompt display (interactive mode)
-	•	Input reading
-	•	Command parsing
-	•	PATH lookup
-	•	Process creation and execution
-	•	Exit status tracking
+Built-in Commands
+exit: Terminates shell with exit status 0
 
-⸻
+Future: env, cd support
 
-Authors
-	•	Amaal Asiriand Norah Aljuhani
+📝 Code Standards
+Betty Style: All code follows Betty coding style guidelines
+
+C90 Compliance: Uses -std=gnu89 flag
+
+Memory Safety: No memory leaks, proper allocation/freeing
+
+5 Functions per File: Modular design with limited function count
+
+🔍 Technical Details
+PID and PPID
+PID: Unique process identifier (getpid())
+
+PPID: Parent process ID (getppid())
+
+Shell creates children with fork(), each gets new PID
+
+Environment Manipulation
+Access via extern char **environ
+
+Custom _getenv() function (avoids forbidden getenv())
+
+PATH parsing with strtok()
+
+System Calls vs Functions
+c
+/* System Call - kernel interaction */
+fork();    // Creates process
+execve();  // Executes program
+wait();    // Waits for child
+
+/* Library Function - user space */
+printf();  // Formatted output
+strtok();  // String tokenization
+malloc();  // Memory allocation
+🧪 Testing
+bash
+# Interactive testing
+./hsh
+
+# Non-interactive testing
+echo "ls" | ./hsh
+
+# Error testing
+echo "nonexistent" | ./hsh
+
+# Memory leak check
+valgrind --leak-check=full ./hsh
+👥 Authors
+This project is developed by Amaal Asiri and Norah Aljuhani. See AUTHORS file for complete list.
+
+📄 License
+Part of Holberton School curriculum - Educational purposes.
+
+Project Status: Implements Simple Shell 0.3+ (PATH handling, exit built-in, command execution)
