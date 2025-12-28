@@ -1,2 +1,74 @@
-Simple Shell
-to be updated
+SIMPLE_SHELL(1)          User Commands          SIMPLE_SHELL(1)
+
+NAME
+       simple_shell - a simple UNIX command line interpreter
+
+SYNOPSIS
+       ./hsh
+
+DESCRIPTION
+       simple_shell is a basic UNIX command line interpreter that
+       executes commands read from standard input.
+
+       It works in both interactive and non-interactive modes and
+       supports execution of programs found in the PATH environment
+       variable, as well as built-in commands.
+
+       The shell displays a prompt when running interactively and
+       waits for the user to enter a command followed by a new line.
+
+FEATURES
+       - Executes commands with arguments
+       - Supports absolute and relative paths
+       - Searches executables using the PATH variable
+       - Built-in commands:
+           * exit : exits the shell
+           * env  : prints the current environment
+       - Proper error handling
+       - No memory leaks
+
+BUILT-IN COMMANDS
+       exit
+              Exits the shell.
+
+       env
+              Prints the current environment variables.
+
+USAGE
+       Interactive mode:
+              ./hsh
+              $ ls
+              $ pwd
+              $ env
+              $ exit
+
+       Non-interactive mode:
+              echo "ls -l" | ./hsh
+
+ENVIRONMENT
+       PATH
+              Used to locate executable programs.
+
+       environ
+              An array of strings representing the environment.
+
+EXIT STATUS
+       simple_shell returns the exit status of the last executed
+       command.
+
+       0   Successful execution
+       127 Command not found
+
+LIMITATIONS
+       This shell does not support:
+       - Pipes
+       - Redirections
+       - Command chaining
+       - Wildcards
+       - Advanced built-in commands such as cd
+
+AUTHORS
+ Norah Aljuhani
+AMAAL ASIRI
+SEE ALSO
+       sh(1), bash(1), execve(2), fork(2), wait(2)
