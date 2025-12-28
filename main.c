@@ -30,7 +30,15 @@ int main(int argc, char **argv)
 
 		args = split_line(line);
 		if (args && args[0])
+		{
+			if (strcmp(args[0], "exit") == 0)
+			{
+				free_args(args);
+				free(line);
+				return (last_status);
+			}
 			execute_command(args);
+		}
 
 		free_args(args);
 		free(line);
