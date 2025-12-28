@@ -1,35 +1,96 @@
-Simple Shell Project
-📖 Overview
-A minimal UNIX command line interpreter written in C that replicates basic sh functionality. This project demonstrates core operating system concepts including process creation, command execution, and environment management.
+# Holberton School - Simple Shell
 
-✨ Features
-Interactive & Non-Interactive Modes: Works with user input and piped commands
+## Description
+**Simple Shell** is a UNIX command interpreter written in C that replicates the basic functionality of `/bin/sh`.  
+It executes commands in both interactive and non-interactive modes, handles built-in commands, PATH searching, and manages exit statuses properly.
 
-PATH Resolution: Searches for executables in PATH directories
+---
 
-Built-in Commands: Supports exit command
+## Features
+- ✅ Display a prompt and wait for user input
+- ✅ Execute commands with absolute paths (e.g., `/bin/ls`)
+- ✅ Execute commands using the PATH environment variable (e.g., `ls`)
+- ✅ Handle command lines with arguments (e.g., `ls -l /tmp`)
+- ✅ Implement custom PATH searching without `getenv`
+- ✅ Handle the `exit` built-in command with proper exit status
+- ✅ Handle the `env` built-in command
+- ✅ Handle end-of-file condition (Ctrl+D)
+- ✅ Proper exit status handling (0, 127, etc.)
+- ✅ No memory leaks (Valgrind clean)
+- ✅ No unnecessary `fork` calls if command doesn't exist
 
-Error Handling: Displays errors matching /bin/sh format
+---
 
-Memory Management: No memory leaks (valgrind clean)
+---
 
-🛠️ Compilation
-bash
-gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
-🚀 Usage
-Interactive Mode
-bash
-$ ./hsh
-:) ls
-file1.txt file2.txt
-:) exit
-$
-Non-Interactive Mode
-bash
-$ echo "ls" | ./hsh
-file1.txt file2.txt
-🔄 Flowchart - How the Shell Works
-┌───────────────┐
+## Key Functions
+
+| File           | Function                | Description                                                    |
+|----------------|------------------------|----------------------------------------------------------------|
+| main.c         | main()                 | Entry point, manages shell loop and exit status               |
+| shell.c        | display_prompt()       | Displays shell prompt `$`                                      |
+| shell.c        | read_line()            | Reads input from user using custom `_getline`                 |
+| shell.c        | parse_line()           | Parses input into array of arguments                          |
+| shell.c        | free_array()           | Frees allocated memory for argument array                     |
+| find_path.c    | get_path_env()         | Gets PATH from `environ` without `getenv`                     |
+| find_path.c    | find_path()            | Searches for command in PATH directories                      |
+| run_command.c  | fork_and_execute()     | Forks and executes command with proper exit status            |
+| run_command.c  | execute_command()      | Main execution logic, returns correct exit codes              |
+| builtin.c      | handle_exit()          | Handles `exit` command with last exit status                  |
+| builtin.c      | handle_env()           | Prints environment variables                                   |
+| builtin.c      | is_builtin()           | Checks and executes built-in commands                          |
+
+---
+
+## Built-in Commands
+
+| Command | Description                           | Usage  |
+|---------|---------------------------------------|--------|
+| exit    | Exit the shell with last command exit | exit   |
+| env     | Print all environment variables       | env    |
+
+---
+
+## Technical Details
+
+**Memory Management**
+- All allocated memory is properly freed
+- No memory leaks (verified with Valgrind)
+- `exit` command frees all resources before exiting
+
+**Process Management**
+- Uses `fork()` to create child processes
+- Uses `execve()` to execute commands
+- Uses `waitpid()` to wait for child and get exit status
+- Uses `WIFEXITED()` and `WEXITSTATUS()` macros
+
+**PATH Handling**
+- Custom `get_path_env()` replaces forbidden `getenv()`
+- Searches through `environ` array directly
+- Handles empty PATH correctly
+- Returns `NULL` for commands not found in PATH
+
+---
+
+## Project Information
+
+- **Language:** C  
+- **C Standard:** gnu89  
+- **License:** Educational purposes (Holberton School)  
+- **Total Functions:** 12 functions across 5 files (max 4 per file)
+
+## Project Structure
+
+| File          | Description                          | Functions                                         |
+| ------------- | ------------------------------------ | ------------------------------------------------- |
+| main.h        | Header file with function prototypes | N/A                                               |
+| main.c        | Main entry point and shell loop      | main()                                            |
+| shell.c       | Core shell functions                 | display_prompt, read_line, parse_line, free_array |
+| find_path.c   | Custom PATH searching without getenv | get_path_env, find_path                           |
+| run_command.c | Command execution and process mgmt   | fork_and_execute, execute_command                 |
+| builtin.c     | Built-in commands implementation     | handle_exit, handle_env, is_builtin               |
+| README.md     | Project documentation                | N/A                                               |
+            ┌───────────────┐
             │   Start hsh   │
             └───────┬───────┘
                     │
@@ -102,100 +163,6 @@ file1.txt file2.txt
                     ┌───────▼───────┐
                     │ Loop again    │
                     └───────────────┘
-📁 File Structure
-text
-simple_shell/
-├── AUTHORS                 # Contributors list
-├── README.md              # This file
-├── man_1_simple_shell     # Manual page
-├── shell.h                # Header file with prototypes
-├── main.c                 # Entry point and main loop
-├── input.c                # Input reading and parsing
-├── path.c                 # PATH handling functions
-├── execute.c              # Command execution logic
-├── builtins.c             # Built-in commands (exit)
-└── helpers.c              # Utility functions
-🧠 Core Concepts Implemented
-Process Management
-Uses fork() to create child processes
 
-execve() replaces process image with command
-
-wait() suspends parent until child terminates
-
-PATH Resolution
-Checks if command contains / (absolute/relative path)
-
-Searches directories in PATH variable
-
-Uses access() or stat() to check file existence and permissions
-
-Returns full path or NULL if not found
-
-Error Handling
-Matches /bin/sh error format: ./hsh: 1: command: not found
-
-Returns exit code 127 for command not found
-
-Uses write() for error output to avoid forbidden functions
-
-Built-in Commands
-exit: Terminates shell with exit status 0
-
-Future: env, cd support
-
-📝 Code Standards
-Betty Style: All code follows Betty coding style guidelines
-
-C90 Compliance: Uses -std=gnu89 flag
-
-Memory Safety: No memory leaks, proper allocation/freeing
-
-5 Functions per File: Modular design with limited function count
-
-🔍 Technical Details
-PID and PPID
-PID: Unique process identifier (getpid())
-
-PPID: Parent process ID (getppid())
-
-Shell creates children with fork(), each gets new PID
-
-Environment Manipulation
-Access via extern char **environ
-
-Custom _getenv() function (avoids forbidden getenv())
-
-PATH parsing with strtok()
-
-System Calls vs Functions
-c
-/* System Call - kernel interaction */
-fork();    // Creates process
-execve();  // Executes program
-wait();    // Waits for child
-
-/* Library Function - user space */
-printf();  // Formatted output
-strtok();  // String tokenization
-malloc();  // Memory allocation
-🧪 Testing
-bash
-# Interactive testing
-./hsh
-
-# Non-interactive testing
-echo "ls" | ./hsh
-
-# Error testing
-echo "nonexistent" | ./hsh
-
-# Memory leak check
-valgrind --leak-check=full ./hsh
-👥 Authors
-This project is developed by Amaal Asiri and Norah Aljuhani. See AUTHORS file for complete list.
-
-📄 License
-Part of Holberton School curriculum - Educational purposes.
-
-Project Status: Implements Simple Shell 0.3+ (PATH handling, exit built-in, command execution)
+Amaal Asiri
+Norah Aljuhani
