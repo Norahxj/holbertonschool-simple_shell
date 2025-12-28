@@ -165,4 +165,4 @@ It executes commands in both interactive and non-interactive modes, handles buil
                     └───────────────┘
 
 Amaal Asiri
-Norah Aljuhani
+and Norah Aljuhani
