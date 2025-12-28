@@ -37,7 +37,15 @@ int main(int argc, char **argv)
 				free(line);
 				return (last_status);
 			}
-			execute_command(args);
+			if (strcmp(args[0], "env") == 0)
+			{
+				print_env();
+				last_status = 0;
+			}
+			else
+			{
+				execute_command(args);
+			}
 		}
 
 		free_args(args);
