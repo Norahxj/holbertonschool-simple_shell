@@ -1,168 +1,125 @@
-# Holberton School - Simple Shell
+# ✨🐚 Simple Shell 🐚✨
 
-## Description
-**Simple Shell** is a UNIX command interpreter written in C that replicates the basic functionality of `/bin/sh`.  
-It executes commands in both interactive and non-interactive modes, handles built-in commands, PATH searching, and manages exit statuses properly.
+A simple UNIX command line interpreter written in **C**, built from scratch as part of the **Holberton / ALX Software Engineering Program**.
 
 ---
 
-## Features
-- ✅ Display a prompt and wait for user input
-- ✅ Execute commands with absolute paths (e.g., `/bin/ls`)
-- ✅ Execute commands using the PATH environment variable (e.g., `ls`)
-- ✅ Handle command lines with arguments (e.g., `ls -l /tmp`)
-- ✅ Implement custom PATH searching without `getenv`
-- ✅ Handle the `exit` built-in command with proper exit status
-- ✅ Handle the `env` built-in command
-- ✅ Handle end-of-file condition (Ctrl+D)
-- ✅ Proper exit status handling (0, 127, etc.)
-- ✅ No memory leaks (Valgrind clean)
-- ✅ No unnecessary `fork` calls if command doesn't exist
+## 🌟 Overview
+
+**Simple Shell** is a minimal implementation of a UNIX shell that mimics basic behavior of `/bin/sh`.  
+It allows users to execute commands, handle arguments, work with the `PATH` environment variable, and use built-in commands.
+
+The goal of this project is to understand:
+- How shells work internally
+- Process creation using `fork`
+- Program execution using `execve`
+- Environment variables
+- Memory management in C
 
 ---
 
----
+## ⚙️ Features
 
-## Key Functions
-
-| File           | Function                | Description                                                    |
-|----------------|------------------------|----------------------------------------------------------------|
-| main.c         | main()                 | Entry point, manages shell loop and exit status               |
-| shell.c        | display_prompt()       | Displays shell prompt `$`                                      |
-| shell.c        | read_line()            | Reads input from user using custom `_getline`                 |
-| shell.c        | parse_line()           | Parses input into array of arguments                          |
-| shell.c        | free_array()           | Frees allocated memory for argument array                     |
-| find_path.c    | get_path_env()         | Gets PATH from `environ` without `getenv`                     |
-| find_path.c    | find_path()            | Searches for command in PATH directories                      |
-| run_command.c  | fork_and_execute()     | Forks and executes command with proper exit status            |
-| run_command.c  | execute_command()      | Main execution logic, returns correct exit codes              |
-| builtin.c      | handle_exit()          | Handles `exit` command with last exit status                  |
-| builtin.c      | handle_env()           | Prints environment variables                                   |
-| builtin.c      | is_builtin()           | Checks and executes built-in commands                          |
+✅ Interactive and non-interactive modes  
+✅ Executes commands with arguments  
+✅ Supports absolute & relative paths  
+✅ Searches executables using the `PATH` variable  
+✅ Built-in commands:
+- 🛑 `exit` — exit the shell
+- 🌍 `env` — print the current environment  
+✅ Proper error handling (same output as `/bin/sh`)  
+✅ No memory leaks (checked with **Valgrind**)  
+✅ Betty style compliant  
 
 ---
 
-## Built-in Commands
+## ▶️ Usage
 
-| Command | Description                           | Usage  |
-|---------|---------------------------------------|--------|
-| exit    | Exit the shell with last command exit | exit   |
-| env     | Print all environment variables       | env    |
+### 🔧 Compilation
+```bash
+gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 
----
-
-## Technical Details
-
-**Memory Management**
-- All allocated memory is properly freed
-- No memory leaks (verified with Valgrind)
-- `exit` command frees all resources before exiting
-
-**Process Management**
-- Uses `fork()` to create child processes
-- Uses `execve()` to execute commands
-- Uses `waitpid()` to wait for child and get exit status
-- Uses `WIFEXITED()` and `WEXITSTATUS()` macros
-
-**PATH Handling**
-- Custom `get_path_env()` replaces forbidden `getenv()`
-- Searches through `environ` array directly
-- Handles empty PATH correctly
-- Returns `NULL` for commands not found in PATH
+```
 
 ---
 
-## Project Information
+## 💻 Interactive Mode
+bash
+Copy code
+./hsh
+$ ls
+$ pwd
+$ env
+$ exit
 
-- **Language:** C  
-- **C Standard:** gnu89  
-- **License:** Educational purposes (Holberton School)  
-- **Total Functions:** 12 functions across 5 files (max 4 per file)
+---
 
-## Project Structure
+## 🤖 Non-Interactive Mode
+bash
+Copy code
+echo "ls -l" | ./hsh
 
-| File          | Description                          | Functions                                         |
-| ------------- | ------------------------------------ | ------------------------------------------------- |
-| main.h        | Header file with function prototypes | N/A                                               |
-| main.c        | Main entry point and shell loop      | main()                                            |
-| shell.c       | Core shell functions                 | display_prompt, read_line, parse_line, free_array |
-| find_path.c   | Custom PATH searching without getenv | get_path_env, find_path                           |
-| run_command.c | Command execution and process mgmt   | fork_and_execute, execute_command                 |
-| builtin.c     | Built-in commands implementation     | handle_exit, handle_env, is_builtin               |
-| README.md     | Project documentation                | N/A                                               |
-            ┌───────────────┐
-            │   Start hsh   │
-            └───────┬───────┘
-                    │
-            ┌───────▼───────┐
-            │ Display $     │
-            │ (Interactive) │
-            └───────┬───────┘
-                    │
-            ┌───────▼───────┐
-            │ Read Input    │
-            │ (_getline)    │
-            └───────┬───────┘
-                    │
-        ┌───────────▼───────────┐
-        │ EOF (Ctrl+D) ?         │
-        └───────┬───────────────┘
-                │Yes
-                ▼
-        ┌───────────────────┐
-        │ Free memory &     │
-        │ Exit shell        │
-        └───────────────────┘
-                ▲
-                │No
-        ┌───────┴───────────┐
-        │ Parse input       │
-        │ into arguments    │
-        └───────┬───────────┘
-                │
-        ┌───────▼───────────┐
-        │ Built-in command? │
-        └───────┬───────────┘
-            Yes │       No
-                │
-        ┌───────▼───────┐   ┌───────────────────┐
-        │ Execute       │   │ Find command in    │
-        │ built-in      │   │ PATH or absolute   │
-        │ (exit/env)    │   │ path               │
-        └───────┬───────┘   └─────────┬─────────┘
-                │                     │
-                │             ┌───────▼───────────┐
-                │             │ Command found ?   │
-                │             └───────┬───────────┘
-                │                 Yes │       No
-                │                     │
-        ┌───────▼───────┐     ┌───────▼───────┐
-        │ Update exit   │     │ Print error   │
-        │ status        │     │ exit = 127    │
-        └───────┬───────┘     └───────┬───────┘
-                │                     │
-                └───────────┬─────────┘
-                            │
-                    ┌───────▼───────┐
-                    │ Fork process  │
-                    └───────┬───────┘
-                            │
-                    ┌───────▼───────┐
-                    │ execve()      │
-                    └───────┬───────┘
-                            │
-                    ┌───────▼───────┐
-                    │ waitpid()     │
-                    │ get exit code │
-                    └───────┬───────┘
-                            │
-                    ┌───────▼───────┐
-                    │ Free memory   │
-                    └───────┬───────┘
-                            │
-                    ┌───────▼───────┐
-                    │ Loop again    │
-                    └───────────────┘
+---
 
+## 🛠 Built-in Commands
+Command	Description
+exit	Terminates the shell
+env	Prints all environment variables
+
+---
+
+## 📂 Project Structure
+
+| File | Description |
+|------|------------|
+| `main.c` | Entry point and main shell loop |
+| `shell.h` | Header file (function prototypes and global variables) |
+| `input.c` | Reads user input and splits it into commands |
+| `execute.c` | Handles PATH searching and command execution |
+| `env.c` | Implementation of the `env` built-in command |
+| `README.md` | Project documentation |
+| `man_1_simple_shell` | Manual page for the simple shell |
+| `AUTHORS` | Lists contributors to the project |
+
+---
+
+## 🔍 How It Works:
+1️⃣ Displays a prompt ($) in interactive mode
+2️⃣ Reads user input using getline
+3️⃣ Tokenizes input into arguments
+4️⃣ Checks for built-in commands (exit, env)
+5️⃣ Searches executable using PATH
+6️⃣ Creates a child process using fork
+7️⃣ Executes command with execve
+8️⃣ Parent waits for child process to finish
+
+---
+
+## ⚠️ Limitations:
+🚫 No pipes (|)
+🚫 No redirections (>, <)
+🚫 No command separators (;)
+🚫 No wildcard expansion (*)
+🚫 No built-in commands like cd
+
+---
+
+## 🧠 Key Concepts Learned:
+✔️ Process management (fork, wait)
+✔️ System calls
+✔️ Environment variables
+✔️ Error handling
+✔️ Memory management
+✔️ UNIX architecture
+
+---
+
+## ~_ Flowchart of `Simple Shell Project`
+
+![Simple Shell Flowchart](Simple_Shell_Flowchart.png)
+
+---
+
+## 👩‍💻 Authors:
+Norah Aljuhani
 Amaal Asiri
-and Norah Aljuhani
