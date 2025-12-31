@@ -20,16 +20,16 @@ The goal of this project is to understand:
 
 ## ⚙️ Features
 
-✅ Interactive and non-interactive modes  
-✅ Executes commands with arguments  
-✅ Supports absolute & relative paths  
-✅ Searches executables using the `PATH` variable  
-✅ Built-in commands:
+- ✅ Interactive and non-interactive modes  
+- ✅ Executes commands with arguments  
+- ✅ Supports absolute & relative paths  
+- ✅ Searches executables using the `PATH` variable  
+- ✅ Built-in commands:
 - 🛑 `exit` — exit the shell
 - 🌍 `env` — print the current environment  
-✅ Proper error handling (same output as `/bin/sh`)  
-✅ No memory leaks (checked with **Valgrind**)  
-✅ Betty style compliant  
+- ✅ Proper error handling (same output as `/bin/sh`)  
+- ✅ No memory leaks (checked with **Valgrind**)  
+- ✅ Betty style compliant  
 
 ---
 
@@ -44,27 +44,27 @@ gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 ---
 
 ## 💻 Interactive Mode
-bash
-Copy code
-./hsh
-$ ls
-$ pwd
-$ env
-$ exit
+- bash
+- Copy code
+- ./hsh
+- $ ls
+- $ pwd
+- $ env
+- $ exit
 
 ---
 
 ## 🤖 Non-Interactive Mode
-bash
-Copy code
-echo "ls -l" | ./hsh
+- bash
+- Copy code
+- echo "ls -l" | ./hsh
 
 ---
 
 ## 🛠 Built-in Commands
 Command	Description
-exit	Terminates the shell
-env	Prints all environment variables
+- exit:	Terminates the shell
+- env:	Prints all environment variables
 
 ---
 
@@ -84,33 +84,33 @@ env	Prints all environment variables
 ---
 
 ## 🔍 How It Works:
-1️⃣ Displays a prompt ($) in interactive mode
-2️⃣ Reads user input using getline
-3️⃣ Tokenizes input into arguments
-4️⃣ Checks for built-in commands (exit, env)
-5️⃣ Searches executable using PATH
-6️⃣ Creates a child process using fork
-7️⃣ Executes command with execve
-8️⃣ Parent waits for child process to finish
+- 1️⃣ Displays a prompt ($) in interactive mode
+- 2️⃣ Reads user input using getline
+- 3️⃣ Tokenizes input into arguments
+- 4️⃣ Checks for built-in commands (exit, env)
+- 5️⃣ Searches executable using PATH
+- 6️⃣ Creates a child process using fork
+- 7️⃣ Executes command with execve
+- 8️⃣ Parent waits for child process to finish
 
 ---
 
 ## ⚠️ Limitations:
-🚫 No pipes (|)
-🚫 No redirections (>, <)
-🚫 No command separators (;)
-🚫 No wildcard expansion (*)
-🚫 No built-in commands like cd
+- 🚫 No pipes (|)
+- 🚫 No redirections (>, <)
+- 🚫 No command separators (;)
+- 🚫 No wildcard expansion (*)
+- 🚫 No built-in commands like cd
 
 ---
 
 ## 🧠 Key Concepts Learned:
-✔️ Process management (fork, wait)
-✔️ System calls
-✔️ Environment variables
-✔️ Error handling
-✔️ Memory management
-✔️ UNIX architecture
+- ✔️ Process management (fork, wait)
+- ✔️ System calls
+- ✔️ Environment variables
+- ✔️ Error handling
+- ✔️ Memory management
+- ✔️ UNIX architecture
 
 ---
 
@@ -121,5 +121,5 @@ env	Prints all environment variables
 ---
 
 ## 👩‍💻 Authors:
-Norah Aljuhani
-Amaal Asiri
+- Norah Aljuhani
+- Amaal Asiri
